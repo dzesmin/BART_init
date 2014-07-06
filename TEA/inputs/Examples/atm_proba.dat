@@ -1,0 +1,18 @@
+# This is a TEA pre-atmosphere input file.            
+# TEA accepts a file in this format to produce species abundances as 
+# a function of pressure and temperature.                            
+# Output species must be added in the line immediately following the 
+# FINDSPEC marker and must be named to match JANAF converted names. 
+
+#FINDSPEC
+H_g C_g N_g O_g H2_ref CO_g CH4_g H2O_g N2_ref NH3_g
+
+#FINDTEA
+    Radius   Pressure    Temp                H                C                N                O 
+ 10000.000 1.0000e+00  100.00 9.9917414201e-01 2.6893119784e-04 6.7552462686e-05 4.8937433162e-04 
+  9898.990 1.0000e+00  139.39 9.9917414201e-01 2.6893119784e-04 6.7552462686e-05 4.8937433162e-04 
+  9797.980 1.0000e+00  178.79 9.9917414201e-01 2.6893119784e-04 6.7552462686e-05 4.8937433162e-04 
+  9696.970 1.0000e+00  218.18 9.9917414201e-01 2.6893119784e-04 6.7552462686e-05 4.8937433162e-04 
+  9595.960 1.0000e+00  257.58 9.9917414201e-01 2.6893119784e-04 6.7552462686e-05 4.8937433162e-04 
+  9494.949 1.0000e+00  296.97 9.9917414201e-01 2.6893119784e-04 6.7552462686e-05 4.8937433162e-04 
+  9393.939 1.0000e+00  336.36 9.9917414201e-01 2.6893119784e-04 6.7552462686e-05 4.8937433162e-04

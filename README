@@ -1,0 +1,55 @@
+
+2014-07-06 Jasmina Blecic, jasmina@physics.ucf.edu   Version 1.0
+
+Order of execution.
+In the BART_init directory do the following:
+
+1.
+edit makeP.py - input desired range of pressure in wrapper 
+run makeP.py as makeP.py
+the pressure file will be placed in inputs/press_file/
+
+2. 
+edit makeAbund.py - input desired metalicity
+run makeAbun.py as makeAbun.py
+the abundance file will be placed in inputs/abundances/
+
+3.
+choose a tep file and place it in the TEA/inputs/tepfile/
+
+4.
+edit BARTconfig.py - input names and locations of the BART files
+                     and names of the input and output species
+                     as readJANAF.py produces them
+
+5.
+run makeatm.py
+the pre_atm file will be places in TEA/inputs/pre_atm/
+this will also run initialPT profile and return free parameters
+
+6.
+change the directory to TEA
+cd TEA/
+
+7.
+copy BARTconfig.py into the TEA root directory
+cp ~/BART_init/BARTconfig.py /BART_init/TEA/BARTconfig.py
+
+8.
+run prepipe to produce thermochemical library
+prepipe.py
+
+9. 
+run TEA
+this will produce final atm_file which will be placed in TEA/results/
+
+10.
+go back to BART_init directory
+cd ..
+
+11.
+run function readatm() inside InputConverter.py
+this will return temperature, abundance array and other important info
+needed for Transit
+
+
