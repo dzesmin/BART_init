@@ -4,6 +4,11 @@
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
 # abundances for hot-Jupiter atmospheres under thermochemical equilibrium
 # conditions.
+#
+# This project was completed with the support of the NASA Earth and Space 
+# Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
+# PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
+# assistant coder for the first pre-release Oliver M. Bowman.  
 # 
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
@@ -31,9 +36,9 @@
 # ******************************* END LICENSE *******************************
 
 import numpy as np
-from BARTconfig import *
-from initialPT import *
+from InitialPT import *
 import os
+import matplotlib.pyplot as plt
 
 # =============================================================================
 # This code produces a pre-atm file in the format that TEA can read. It 
@@ -60,7 +65,12 @@ import os
 # This code runs with the simple call: makeatm.py
 # =============================================================================
 
-# 2014-07-01 0.1  Jasmina Blecic, jasmina@physics.ucf.edu   Original version
+# 2014-06-01      Oliver Bowman and Jasmina Blecic made first release TEA 
+#                 version of makeatm()
+# 2014-07-14      Jasmina Blecic, jasmina@physics.ucf.edu   
+#                 Modified: makeatm() to add mean molar mass and radii 
+#                           calculation, added get_g(), radpress() and 
+#                           read_press_file() functions
 
 # reads the tep file and calculates surface gravity
 def get_g(tepfile):
@@ -241,7 +251,7 @@ def read_press_file(press_file):
     return p
 
 
-def make_preatm():
+def make_preatm(curr_dir, tepfile, press_file, abun_file, in_elem, out_spec, pre_atm, a1, a2, p1, p3, T3_fac):
     '''
     This code produces a pre-atm file in the format that TEA can read it. It  
     defines the directory with user inputs, then it reads the pressure file and
@@ -267,12 +277,12 @@ def make_preatm():
 
     Revisions
     ---------
-    2014-07-04 0.1  Jasmina Blecic, jasmina@physics.ucf.edu   Original version
+    2014-07-12 0.1  Jasmina Blecic, jasmina@physics.ucf.edu   Original version
     '''
 
     # Get inputs directory
-    inputs_dir = "TEA/inputs/pre_atm/"
-    if not os.path.exists(inputs_dir): os.makedirs(inputs_dir)
+    #inputs_dir = "TEA/inputs/pre_atm/"
+    #if not os.path.exists(inputs_dir): os.makedirs(inputs_dir)
    
     # Read pressure data
     pres = read_press_file(press_file)
@@ -281,8 +291,11 @@ def make_preatm():
     f = open(abun_file, 'r')
     abundata = []
     for line in f.readlines():
-        l = [value for value in line.split()]
-        abundata.append(l)
+        if line.startswith('#'):
+            continue
+        else:
+            l = [value for value in line.split()]
+            abundata.append(l)
     abundata = np.asarray(abundata)
     f.close()
 
@@ -316,19 +329,8 @@ def make_preatm():
     mu = 0.85 *  H_weight * 2 + 0.15 * He_weight
     mu_array = np.linspace(mu, mu, len(pres)) 
 
-    # reads tepfile and returns Teff
-    Teff = planet_Teff(tepfile)
-
-    # produces initial free parameters
-    PT_params = initialPT_freeParams(tepfile)
-
     # generates initial PT profile
-    PT, T_smooth, p = PT_initial(tepfile, press_file, PT_params)
-
-    # prints in terminal free parameters
-    print '\n   Free parameters of the initial PT profile are: \n' + \
-           '        a1                a2               p1               p3             T3\n\n' + str(PT_params)
-    print
+    PT, T_smooth, p = PT_initial(tepfile, press_file, a1, a2, p1, p3, T3_fac)
 
     # Call radpress function to calculate  radii
     rad = radpress(tepfile, T_smooth, mu_array, pres)
@@ -337,8 +339,11 @@ def make_preatm():
     for n in np.arange(np.size(out_abn)):
         out_abn[n] = str('%1.10e'%out_abn[n])
 
-    # Make a list of all data of interest
-    out = [['    Radius'] + ['Pressure'] + ['Temp'] + out_elem]
+    # Make a list of labels
+    out = ['#Radius'.ljust(10)] + ['Pressure'.ljust(10)] + ['Temp'.ljust(7)]
+    for i in np.arange(nelem):
+         out = out + [out_elem[i].ljust(16)]
+    out = [out]
 
     # Number of layers in the atmosphere
     n_layers = len(pres)
@@ -356,37 +361,28 @@ def make_preatm():
 # FINDSPEC marker and must be named to match JANAF converted names. "
 
     # Place file into inputs directory 
-    inputs_out = inputs_dir + pre_atm
+    #inputs_out = input_dir + pre_atm
 
     # Write pre-atm file
-    f = open(inputs_out, 'w+')
+    f = open(pre_atm, 'w+')
     f.write(header + '\n\n')
     f.write('#FINDSPEC\n' + out_spec + '\n\n')
     f.write('#FINDTEA\n')
     for i in np.arange(n_layers + 1):
         # Radius list
-        f.write(out[i][0].rjust(10) + ' ')
+        f.write(out[i][0].ljust(10) + ' ')
       
         # Pressure list
-        f.write(out[i][1].rjust(10) + ' ')
+        f.write(out[i][1].ljust(10) + ' ')
     
         # Temp list
-        f.write(out[i][2].rjust(7) + ' ')
+        f.write(out[i][2].ljust(7) + ' ')
     
         # Elemental abundance list
         for j in np.arange(nelem):
-            f.write(out[i][j+3].rjust(16)+' ')
+            f.write(out[i][j+3].ljust(16)+' ')
         f.write('\n')
     f.close()
 
     # plots the initialPT profile for a sanity check
-    plot_out = plot_initialPT(tepfile, press_file, PT_params)
-   
-    # shows the plots until user closes them
-    plt.show(block=True)
-
-
-# Execute make_preatm() function
-if __name__ == '__main__':
-   
-    make_preatm()
+    plot_initialPT(curr_dir, tepfile, press_file, a1, a2, p1, p3, T3_fac)

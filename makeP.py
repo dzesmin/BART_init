@@ -3,9 +3,11 @@
 import numpy as np
 import os
 
+
 def makeP(n_layers, p_top, p_bottom, filename, log=True): 
     '''
     Function to make the pressure array file to be used by BART.
+    It is called by BART_config.py.
   
     Parameters:
     -----------
@@ -31,23 +33,23 @@ def makeP(n_layers, p_top, p_bottom, filename, log=True):
     '''
 
     # Put abundances file into inputs directory, create if non-existent
-    pres_dir = "inputs/press_file/"
-    if not os.path.exists(pres_dir): os.makedirs(pres_dir)    
+    #pres_dir = "inputs/press_file/"
+    #if not os.path.exists(pres_dir): os.makedirs(pres_dir)    
 
     # If log=True the logarithmic sampling is chosen, else linear
     if log:
-        pres = np.logspace( np.log10(np.float(p_top)), np.log10(np.float(p_bottom)), n_layers)  # Equispaced pressure 
+        pres = np.logspace( np.log10(np.float(p_top)), np.log10(np.float(p_bottom)), n_layers)   
     else:
-        pres = np.linspace( p_top, p_bottom, n_layers)   # Equispaced pressure array
+        pres = np.linspace( p_top, p_bottom, n_layers)   
 
     # Write header line
     header      = "Layer  P [bar] \n"
 
     # Place pressure file into inputs directory 
-    pres_out = pres_dir + filename
+    #pres_out = pres_dir + filename
 
     # Open file to write 
-    f = open(str(pres_out), 'w+')
+    f = open(str(filename), 'w+')
     f.write(header)
 
     for i in np.arange(n_layers):
@@ -55,24 +57,6 @@ def makeP(n_layers, p_top, p_bottom, filename, log=True):
         f.write(str(i+1).ljust(6) + ' ')
 
         # Pressure list
-        f.write(str(pres[i]).ljust(10) + ' ' + '\n')
+        f.write(str('%4.4e'%pres[i]).ljust(10) + ' ' + '\n')
     f.close()
-
-
-# Call the function to execute
-if __name__ == '__main__':
-   
-    # Set parameters
-    n_layers = 100
-    p_top    = 1e-5
-    p_bottom = 100
-
-    # Set filename
-    filename = 'Test.txt'  
-
-    # Log or linear pressure scale
-    log = True
-
-    # Call the function
-    makeP(n_layers, p_top, p_bottom, filename, log)
 

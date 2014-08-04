@@ -4,7 +4,12 @@
 # Thermal Equilibrium Abundances (TEA), a code to calculate gaseous molecular
 # abundances for hot-Jupiter atmospheres under thermochemical equilibrium
 # conditions.
-# 
+#
+# This project was completed with the support of the NASA Earth and Space 
+# Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
+# PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
+# assistant coder for the first pre-release Oliver M. Bowman. 
+#
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
 # This is a test version only, and may not be redistributed to any third
@@ -48,7 +53,6 @@ import makeheader as mh
 import readatm as ra
 from radpress import *
 
-
 # =============================================================================
 # This program runs TEA over a pre-atm file that contains multiple T-P's.
 # The code first retrieves the pre-atm file, and the current directory
@@ -83,8 +87,11 @@ from radpress import *
 # Example: runatm.py inputs/Examples/atm_Example.dat Atm_Example
 # =============================================================================
 
-# 2014-07-02 0.1  Jasmina Blecic, jasmina@physics.ucf.edu   Revision 1.0
-#                 adapted for BART purposes from original version 
+# 2014-06-01      Oliver Bowman and Jasmina Blecic made original version for
+#                 first TEA release
+# 2014-07-02      Jasmina Blecic, jasmina@physics.ucf.edu   
+#                 Modified: added radii calculation with new radpress module
+#                           and re-arranged previous version for BART project. 
 
 # Time / speed testing
 if times:
@@ -147,7 +154,7 @@ spec_list = np.copy(good_spec)
 if not os.path.exists(out_dir): os.makedirs(out_dir)
 
 # Copy configuration file used for this run to results directory
-shutil.copyfile("TEA_config.py", out_dir + "TEA_config.py")
+shutil.copyfile(cwd + "TEA_config.py", out_dir + "TEA_config.py")
 
 # Copy pre-atmosphere file used for this run to results directory
 shutil.copyfile(infile, out_dir + infile.split("/")[-1][:-4] + "-preatm.dat")
@@ -268,12 +275,13 @@ for q in np.arange(n_runs)[1:]:
 
 # ========== Calculate radii for each pressure ========== 
 # Call radpress module
-rad = rad(atom_arr, temp, pres, spec_list, thermo_dir, n_runs, q, abun_matrix, temp_arr, pres_arr)
+rad = rad(tepfile, atom_arr, temp, pres, spec_list, \
+      thermo_dir, n_runs, q, abun_matrix, temp_arr, pres_arr)
 
 
 # =================== Write atm file =================== 
 # Open final atm file for writing, keep open to add new lines
-fout_name = out_dir + desc + '.dat'
+fout_name = out_dir + desc + '.tea'
 fout = open(fout_name, 'w+')
 
 # Read pre-atm file
@@ -293,11 +301,11 @@ fout.write("\n\n")
 fout.write("#FINDTEA\n")
 
 # Write data header from the pre-atm file into each column of atm file 
-fout.write(radi_arr[0].rjust(10) + ' ')
-fout.write(pres_arr[0].rjust(10) + ' ')
-fout.write(temp_arr[0].rjust(7) + ' ')
+fout.write(radi_arr[0].ljust(10) + ' ')
+fout.write(pres_arr[0].ljust(10) + ' ')
+fout.write(temp_arr[0].ljust(7) + ' ')
 for i in np.arange(np.size(spec_list)):
-    fout.write(spec_list[i].rjust(10)+' ')
+    fout.write(spec_list[i].ljust(10)+' ')
 fout.write('\n')
 
 # Take abundances
@@ -311,11 +319,11 @@ for q in np.arange(n_runs)[1:]:
     temp = temp_arr[q]
 
     # Insert radii array
-    fout.write(radi.rjust(10) + ' ')
+    fout.write(radi.ljust(10) + ' ')
 
     # Insert results from the current line (T-P) to atm file
-    fout.write(pres.rjust(10) + ' ')
-    fout.write(temp.rjust(7) + ' ')
+    fout.write(pres.ljust(10) + ' ')
+    fout.write(temp.ljust(7) + ' ')
 
     # Write current abundances
     for i in np.arange(np.size(spec_list)):
@@ -324,7 +332,6 @@ for q in np.arange(n_runs)[1:]:
 
 # Close atm file
 fout.close()
-
 
 # Time / speed testing
 if times:

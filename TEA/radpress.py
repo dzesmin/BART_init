@@ -4,6 +4,11 @@
 # abundances for hot-Jupiter atmospheres under thermochemical equilibrium
 # conditions.
 # 
+# This project was completed with the support of the NASA Earth and Space 
+# Science Fellowship Program, grant NNX12AL83H, held by Jasmina Blecic, 
+# PI Joseph Harrington. Lead scientist and coder Jasmina Blecic, 
+# assistant coder for the first pre-release Oliver M. Bowman.   
+#
 # Copyright (C) 2014 University of Central Florida.  All rights reserved.
 # 
 # This is a test version only, and may not be redistributed to any third
@@ -34,7 +39,6 @@ import os
 
 import reader as rd
 from makeheader import *
-from BARTconfig import *
 
 # ===========================================================================
 # This module calculates radii for each pressure of the final atm-file. It
@@ -96,7 +100,7 @@ def get_g(tepfile):
 
     # conversion to kg and km
     Mjup = 1.89813e27    # kg
-    Rjup = 69911         # km
+    Rjup = 71492.        # km
 
     # mass and radius of the star in kg and m for g calculation
     Mp = planet_mass * Mjup  # kg
@@ -221,7 +225,7 @@ def mean_molar_mass(atom_arr, temp, pres, spec_list, thermo_dir, n_runs, q, abun
 
     Revisions
     ---------
-    2014-07-02 0.1  Jasmina Blecic, jasmina@physics.ucf.edu   Original version
+    2014-07-14 0.1  Jasmina Blecic, jasmina@physics.ucf.edu   Original version
     '''
 
     # Set up locations of the basic abundances file
@@ -232,8 +236,11 @@ def mean_molar_mass(atom_arr, temp, pres, spec_list, thermo_dir, n_runs, q, abun
     f = open(abun_file, 'r')
     abundata = []
     for line in f.readlines():
-        l = [value for value in line.split()]
-        abundata.append(l)
+        if line.startswith('#'):
+            continue
+        else:
+            l = [value for value in line.split()]
+            abundata.append(l)
     abundata = np.asarray(abundata)
     f.close()
 
@@ -286,7 +293,7 @@ def mean_molar_mass(atom_arr, temp, pres, spec_list, thermo_dir, n_runs, q, abun
 
 
 # wrapper for radpress() and mean_molar_mass() functions, gives final radii
-def rad(atom_arr, temp, pres, spec_list, thermo_dir, n_runs, q, abun_matrix, temp_arr, pres_arr):
+def rad(tepfile, atom_arr, temp, pres, spec_list, thermo_dir, n_runs, q, abun_matrix, temp_arr, pres_arr):
     '''
     This function calculates radii for each pressure of the atm file. It takes 
     the mean molecular mass array calculated by mean_molar_mass() function, 
